@@ -1,0 +1,124 @@
+
+
+# Set the initial parameters
+
+sigma = 2.0
+
+N = 100
+
+mu = 10
+
+
+
+# Generate observations here
+
+x = rep(0, N)
+
+
+
+hist(x, breaks = 50)
+
+x = rnorm(N, mu, sigma)
+
+
+
+# Write down the same model in JAGS notation.
+
+model1.string = "
+
+model {
+
+# Prior
+
+sigma ~ dgamma(a, b)
+
+mu ~ dnorm(mu_hat, 1/sigma_hat^2)
+
+
+
+# Likelihood
+
+for (i in 1:N) {
+
+x[i] ~ dnorm(mu, 1/sigma^2)
+
+
+}
+}
+
+"
+
+
+
+# JAGS usually reads models from a text file; here we use a string as a fake file.  
+
+model1.spec = textConnection(model1.string)
+
+
+
+# Construct the object containing both the model specification as well as the data and some sampling parameters.
+
+jagsmodel1 <- jags.model(model1.spec,
+                         
+                         data = list('N' = N,                    # the number of data points
+                                     
+                                     'x' = x,
+                                     
+                                     'a' = 10,
+                                     
+                                     'b' = 10,
+                                     
+                                     'mu_hat' = mu_hat,
+                                     
+                                     'sigma_hat' = sigma_hat# the observations
+                                     
+                         ), 
+                         
+                         n.chains=4)
+
+
+
+mcmciterations = 10000
+
+
+
+ samples = coda.samples(jagsmodel1,
+
+                        c('mu'), # which parameters do you want to monitor?
+
+                        n.iter=mcmciterations)
+
+ # plot/interpret the results
+
+ # mcmcsummary = summary(samples)
+ # 
+ # mcmcsummary $ statistics
+ # 
+ # 
+ # plotPost(samples[,'mu'], xlab = 'mu')
+ # 
+ # diagMCMC(codaObject = samples, parName = 'mu')
+
+
+
+
+
+samples = coda.samples(jagsmodel1,
+
+                       c('sigma'), # which parameters do you want to monitor?
+
+                       n.iter=mcmciterations)
+
+# plot/interpret the results
+
+mcmcsummary = summary(samples)
+
+mcmcsummary $ statistics
+
+
+
+plotPost(samples[,'sigma'], xlab = 'sigma')
+
+
+diagMCMC(codaObject = samples, parName = 'sigma')
+
