@@ -1,5 +1,4 @@
-
-# Optional generic preliminaries:
+ptional generic preliminaries:
 graphics.off() # This closes all of R's graphics windows.
 rm(list=ls())  # Careful! This clears all of R's memory!
 
@@ -65,7 +64,7 @@ jagsmodel3 <- jags.model(exammodel3.spec,
 
 # Collect samples to approximate the posterior distribution.
 model3samples = coda.samples(jagsmodel3,
-                             c('theta'), # which variables do you want to monitor
+                             c('p'), # which variables do you want to monitor
                              n.iter = mcmciterations)
 # Add your analyses on the collected samples here:
 mcmcsummary = summary (model3samples)
