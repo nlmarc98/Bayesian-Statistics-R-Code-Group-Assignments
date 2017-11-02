@@ -1,0 +1,68 @@
+
+linreg_model2 ="
+model{  
+  
+  # Prior
+    tau ~ dgamma(0.01,0.01)
+
+    a = 1
+    b = 1
+    alpha ~ dbeta(a,b)
+    for (i in 1:n) {
+      z[i] ~ dbern(alpha)
+    }
+
+    for (i in 1:2) {  
+      w[1,i] ~ dnorm(0,1)
+      w[2,i] ~ dnorm(0,1)
+    }
+
+# Likelihood
+    for (i in 1:n) {
+      mu[i] = ((w[1,1]+w[1,2]*x[i])*equals(z[i],0)) + ((w[2,1] + w[2,2]*x[i])*equals(z[i],1))
+      y[i] ~ dnorm(mu[i], tau)
+    }
+
+}
+
+"
+
+
+niter = 10000
+nchains = 4
+# Create your data structure here
+data = list('n'= n,'x'= x, 'y' = y)
+
+jagsmodel_linreg2 <- jags.model(textConnection(linreg_model2), 
+                                data = data,
+                                n.chains = nchains)
+
+store_parameters = c('w')
+
+# Collect samples and store them in a matrix of niter*nchains by number-of-stored-parameters
+samples_twolines = coda.samples(jagsmodel_linreg2, store_parameters, n.iter = niter)
+samplesMatrix = as.matrix(samples_twolines)
+mcmcsummary2 = summary(samples_twolines)
+mcmcsummary2 $ statistics
+m <- mcmcsummary2$statistics[,"Mean"]
+
+
+plot(x,y,pch=20)
+all_samples = c(samples_twolines[[1]], samples_twolines[[2]], samples_twolines[[3]],samples_twolines[[4]])
+
+list <- c()
+N=500
+for (i in 1:N){
+  a <- sample(seq(1,4), 1, replace = FALSE)
+  b <- sample(10000, 1)
+  c <- samples_twolines[[a]][b, ]
+  list<- c(list, c)
+}
+
+plot(x,y, xlab = "Percentage change in manpower", ylab = "Percentage change in thefts", pch=20)
+for (i in seq(1, N, by = 2)){
+  abline(list[i], list[i+1], col=rgb(0.8, 0.2, 0.2, max = 1.0, alpha = 0.1))
+}
+abline(m[1], m[3], col="blue", lwd = 2)
+abline(m[2], m[4], col="green", lwd = 2)
+
