@@ -1,0 +1,75 @@
+## -------- Model selection --------
+
+linreg_model3 ="
+model{ 
+
+m_prob[1] <- 0.5
+m_prob[2] <- 0.5
+m ~ dcat( m_prob[] )
+
+z_prob[1] <- 0.5
+z_prob[2] <- 0.5
+
+tau ~ dgamma(0.01,0.01)
+for (i in 1:2){
+w1[i] ~ dnorm(0,1)
+}
+
+for (i in 1:2) {  
+w2[1,i] ~ dnorm(0,1)
+w2[2,i] ~ dnorm(0,1)
+}
+
+# Likelihood
+for (i in 1:n) {
+z[i] ~ dcat(z_prob[])
+mu[i] = equals(m, 1)*(w1[1] + w1[2]*x[i]) + equals(m,2)*((w2[1,1]+w2[1,2]*x[i])*equals(z[i],1) + ((w2[2,1] + w2[2,2]*x[i])*equals(z[i],2)))
+y[i] ~ dnorm(mu[i], tau)
+
+}
+
+}
+"
+
+niter = 10000
+nchains = 4
+# Create your data structure here
+data = list('n'= n,'x'= x, 'y' = y)
+
+jagsmodel_linreg3 <- jags.model(textConnection(linreg_model3), 
+                                data = data,
+                                n.chains = nchains)
+
+store_parameters = c('w1', 'w2', 'm')
+
+# Collect samples and store them in a matrix of niter*nchains by number-of-stored-parameters
+samples_oneortwolines = coda.samples(jagsmodel_linreg3, store_parameters, n.iter = niter)
+samplesMatrix = as.matrix(samples_oneortwolines)
+samplesMatrix[,1]
+
+plot(x,y,pch=20)
+
+mcmcsummary2 = summary(samples_oneortwolines)
+
+
+m1 <- samplesMatrix[which(samplesMatrix[,1] ==1),]
+m2 <- samplesMatrix[which(samplesMatrix[,1] ==2),]
+
+
+
+m1_samples <- sample(length(m1[,1]), 250, replace=FALSE)
+for (i in 1:length(m1_samples)){
+  abline(a=m1[m1_samples[i],2], b=m1[m1_samples[i],3],col=rgb(0.8, 0.2, 0.2, max = 1.0, alpha = 0.1))
+}
+
+m2_samples <- sample(length(m2[,1]), 250, replace=FALSE)
+for (i in 1:length(m2_samples)){
+  abline(a=m2[m2_samples[i],4], b=m2[m2_samples[i],5],col=rgb(0.2, 0.8, 0.2, max = 1.0, alpha = 0.1))
+  abline(a=m2[m2_samples[i],6], b=m2[m2_samples[i],7],col=rgb(0.2, 0.8, 0.2, max = 1.0, alpha = 0.1))
+}
+
+
+postodd1 <- length(m1[,1])/length(samplesMatrix[,1])
+postodd2 <- 1-postodd1
+
+bayes_factor <- postodd1/postodd2
