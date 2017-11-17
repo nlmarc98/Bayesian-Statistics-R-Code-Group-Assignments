@@ -49,3 +49,18 @@ evidence_m0(theta,z,N)
 evidence_m1(a,b,N,z)
 
 BF<- evidence_m1(a,b,N,z)/evidence_m0(theta,z,N)
+
+
+bfs=c()
+
+for (a in seq(1,400, 0.1)){
+  m0 <- evidence_m0(theta, z,N)
+  m1 <- evidence_m1(a,a,N,z)
+  BF<- m1/m0
+  bfs<- c(bfs, BF)
+}
+
+plot(seq(1,400,0.1), bfs, xlab = "a", ylab = "bayes factors")
+abline(1,0, col="green", lwd = 2)
+
+max(bfs)
