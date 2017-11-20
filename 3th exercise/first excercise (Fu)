@@ -1,0 +1,102 @@
+###########
+####1.1####
+###########
+binomial = function(N, k, theta) {
+  bionom <- choose(N, k)*(theta^k)*((1-theta)^(N-k))
+  return(bionom)
+}
+
+p<-0
+val<-0
+for(i in 250:140){
+  p <- binomial(250, i, 0.5)
+  val <- p+val
+}
+val*2
+
+###########
+####1.3####
+###########
+spike_evidence <- function(N, z, theta){
+  return(theta^z*(1-theta)^(N-z))
+} 
+
+beta_bernoulli_evidence <- function(a, b, N, z) {
+  return(beta( z+a, N-z+b) / beta(a, b))
+}
+
+BF10 <- function(a, b, N, z, theta) {
+  return(beta_bernoulli_evidence(a, b, N, z)/spike_evidence(N, z, theta))
+}
+
+a<-1
+b<-1
+N<- 250
+z<- 140
+theta<-0.5
+
+e0<- spike_evidence(N, z, theta)
+e1<- beta_bernoulli_evidence(a, b, N, z)
+BF10(a, b, N, z, theta)
+
+###########
+####1.4####
+###########
+BFS=c()
+for (a in seq(1,400, 0.1)){
+  e0 <- spike_evidence(N, z, theta)
+  e1 <- beta_bernoulli_evidence(a, a, N, z)
+  BF <- BF10(a, a, N, z, theta)
+  BFS<- c(BFS, BF)
+}
+
+plot(seq(1,400,0.1), BFS, xlab = 'alpha', ylab = 'bayes factor')
+abline(1,0, col='red', lwd = 3)
+max(BFS)
+
+###########
+####1.7####
+###########
+#1.6 beta-bernoulli like-function
+
+theta<-0.56
+e2<- spike_evidence(N, z, theta)
+BF <- e2/e0
+
+#1.8 strength of evidence is substantial; so m2 and m1 are equal preffered
+
+###########
+####1.9####
+###########
+p<-0
+val<-0
+for(i in 250:141){
+  p <- binomial(250, i, 0.5)
+  val <- p+val
+}
+val*2
+#p-value under the 0.05
+
+###########
+####1.10###
+###########
+a<-1
+b<-1
+N<- 250
+z<- 141
+theta<-0.5
+
+BFS=c()
+for (a in seq(1,400, 0.1)){
+  e0 <- spike_evidence(N, z, theta)
+  e1 <- beta_bernoulli_evidence(a, a, N, z)
+  BF <- BF10(a, a, N, z, theta)
+  BFS<- c(BFS, BF)
+}
+
+plot(seq(1,400,0.1), BFS, xlab = 'alpha', ylab = 'bayes factor')
+abline(1,0, col='red', lwd = 3)
+max(BFS)
+#2.334489
+
+
