@@ -45,7 +45,7 @@ jagsmodel_winter <- jags.model(textConnection(winter_model),
 samples_winter = coda.samples(jagsmodel_winter, parameters, n.iter = niter)
 samples = as.matrix(samples_winter)
 
-plotPost(samples_winter[,'delta'], xlab = 'delta')
+plotPost(samples_winter[,'delta'], xlab = 'delta') #95% HDI [0.0249, 0.12]
 diagMCMC(codaObject = samples_winter, parName = 'delta')
 
 mcmcsummary = summary(samples_winter)
