@@ -165,3 +165,49 @@ legend(x = 'topleft',
 
 # Compute the correlation between the actual and estimated membrane potentials:
 cor(mean_mp, m)
+
+
+################### 
+model_spikes_modelcomparison = "
+model {
+
+  m_prob[1] <- 0.5
+  m_prob[2] <- 0.5
+  mod ~ dcat(m_prob[])
+
+  alpha ~ dbeta(10,10)
+  nu ~ dgamma(1,2)
+  fmax ~ dunif(0,1)
+  theta ~ dnorm(2,2)
+
+  m[1] ~ dnorm(alpha, nu)
+  p[1] = fmax*(1/(1+exp(-(m[1]+theta))))
+  s[1] ~ dbern(p[1])
+
+  for(t in 2:T){
+  psi[t] <- equals(mod,1)*alpha + equals(mod,2)*(alpha*m[t-1])
+  m[t] ~ dnorm(psi[t], nu)
+  p[t] = fmax*(1/(1+exp(-(m[t]+theta))))
+  s[t] ~ dbern(p[t])
+  }
+
+}
+"
+
+niter=10000
+nchains=4
+nsamples = niter*nchains
+
+data <- list('T' = T, 's' = s) # to be passed on to JAGS
+parameters <- c('mod') # fill in
+jagsmodel <- jags.model(textConnection(model_spikes_modelcomparison), 
+                        data = data, 
+                        n.chains = nchains)
+mcmcsamples = coda.samples(jagsmodel, parameters, n.iter = niter)
+samples = as.matrix(mcmcsamples)
+
+# Compute the Bayes factor 10 (i.e. temporal dependency / no dependency):
+m = samples[,"mod"]
+posterior_model1 = sum(m==1) / length(m)
+posterior_model2 = 1 - posterior_model1
+posterior_model2/posterior_model1
