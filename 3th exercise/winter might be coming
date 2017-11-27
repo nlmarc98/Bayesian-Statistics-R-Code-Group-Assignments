@@ -45,7 +45,6 @@ jagsmodel_winter <- jags.model(textConnection(winter_model),
 samples_winter = coda.samples(jagsmodel_winter, parameters, n.iter = niter)
 samples = as.matrix(samples_winter)
 
-plotPost(samples_winter[,'delta'], xlab = 'delta') #95% HDI [0.0249, 0.12]
 diagMCMC(codaObject = samples_winter, parName = 'delta')
 
 mcmcsummary = summary(samples_winter)
@@ -110,8 +109,17 @@ SD10 = posterior_at_0/prior_at_0 #between 0.25 and 0.30
 SD01 = prior_at_0/posterior_at_0
 
 # Compute analytical Bayes factor:
-BF01 = ((lchoose(nE, sE)*lchoose(nW, sW)*(nE+1)*(nW+1))/(lchoose(nE+nW, sE+sW)*(nE+nW+1)))
-SD10
-SD01
+BF01 = function(Ne, Nw, sE, sW) {
+  BF <- ((lchoose(Ne, sE)+lchoose(Nw, sW))-(lchoose(Ne+Nw, sE+sW)))+((log(Ne+1))+(log(Nw+1))-(log(Ne+Nw+1)))
+  return(exp(BF))
+}
+
+BF10 = 1/BF01(Ne=4241, Nw=412, sE=2545, sW=277) #4.021622
 
 # Compute relevant quantities for report:
+plotPost(samples_winter[,'delta'], xlab = 'delta')#95% HDI [0.0249, 0.12]
+
+# p(m1| sE,sW,NE,NW)/p(m0| sE,sW,NE,NW)  4.021622
+# p(m0| sE,sW,NE,NW) = 1 - p(m0| sE,sW,NE,NW)
+pm1 = BF10/(1+BF10) # =0.8008612
+pm0 = 1-pm1 # =0.1991388
