@@ -1,0 +1,175 @@
+#Group exercise 3
+#Marc-William Verwoert (s4718801)
+#Madelief & Fu-Rianne
+
+#1.1
+N=250
+z=140
+theta=0.5
+
+p_value_bin <- function (z, N, theta){
+  p<-choose(N, z) * theta^z*(1-theta)^(N-z)
+  return (p)
+}
+
+pValue<-0
+
+for(z in 1:110){
+  pValue <- pValue+p_value_bin(z,N, theta)}
+
+pValue*2
+
+#times 2, due two sided test.
+
+#binom.test(140, 250, 0.5, alternative="two.sided") 
+
+#1.3
+
+N=250
+z=140
+theta=0.5
+# evidence model 0
+
+evidence_m0 <- function(theta, z, N) {
+  pdf <- theta^z * (1 - theta)^(N - z)
+  return(pdf)
+}
+
+#evidence model 1
+
+a=1
+b=1  
+
+evidence_m1 <- function(a, b, N, z) {
+  m<-beta( z+a, N-z+b ) / beta( a, b )  
+  return (m)
+}
+
+evidence_m0(theta,z,N)
+evidence_m1(a,b,N,z)
+
+BF<- evidence_m1(a,b,N,z)/evidence_m0(theta,z,N)
+
+
+bfs=c()
+
+for (a in seq(1,1000, 0.1)){
+  m0 <- evidence_m0(theta, z,N)
+  m1 <- evidence_m1(a,a,N,z)
+  BF<- m1/m0
+  bfs<- c(bfs, BF)
+}
+
+plot(seq(1,1000,0.1), bfs, xlab = "a", ylab = "bayes factors")
+abline(1,0, col="green", lwd = 2)
+
+max(bfs)
+
+
+#####
+#1.7.
+z=140
+N=250
+theta=0.5
+
+# evidence model 0
+
+evidence_m0 <- function(theta, z, N) {
+  pdf <- theta^z * (1 - theta)^(N - z)
+  return(pdf)
+}
+
+#evidence model 2
+
+theta2=0.56
+
+evidence_m2 <- function(theta2, z, N) {
+  pdf <- theta2^z * (1 - theta2)^(N - z)
+  return(pdf)
+}
+
+
+evidence_m0(theta,z,N)
+evidence_m2(theta2,z,N)
+
+BF<- evidence_m2(theta2,z,N)/evidence_m0(theta,z,N) 
+#BF<- evidence_m0(theta2,z,N)/evidence_m0(theta,z,N) 
+BF
+
+#1.9.
+N=250
+z=141
+theta=0.5
+
+p_value_bin <- function (N, z, theta){
+  p<-choose(N, z) * theta^z*(1-theta)^(N-z)
+  return (p)
+}
+
+pValue<-0
+
+for(z in 250:141){ #z in 250:141
+  pValue <- pValue+p_value_bin(250,z, theta)}
+
+pValue*2
+
+#times 2, due two sided test.
+
+#binom.test(140, 250, 0.5, alternative="two.sided") 
+
+
+#p-value under the 0.05
+#times 2, due two sided test.
+
+#binom.test(141, 250, 0.5, alternative="two.sided") 
+
+
+###
+#1.10
+
+N=250
+z=141
+theta=0.5
+# evidence model 0
+
+evidence_m0 <- function(theta, z, N) {
+  pdf <- theta^z * (1 - theta)^(N - z)
+  return(pdf)
+}
+
+#evidence model 1
+
+a=1
+b=1  
+
+evidence_m1 <- function(a, b, N, z) {
+  m<-beta( z+a, N-z+b ) / beta( a, b )  
+  return (m)
+}
+
+evidence_m0(theta,z,N)
+evidence_m1(a,b,N,z)
+
+BF<- evidence_m1(a,b,N,z)/evidence_m0(theta,z,N)
+
+bfs=c()
+
+for (a in seq(1,400, 0.1)){
+  m0 <- evidence_m0(theta, z,N)
+  m1 <- evidence_m1(a,a,N,z)
+  BF<- m1/m0
+  bfs<- c(bfs, BF)
+}
+
+plot(seq(1,400,0.1), bfs, xlab = "a", ylab = "bayes factors")
+abline(1,0, col="green", lwd = 2)
+
+max(bfs)
+
+
+#########################
+
+
+# Exercise 2
+
+
