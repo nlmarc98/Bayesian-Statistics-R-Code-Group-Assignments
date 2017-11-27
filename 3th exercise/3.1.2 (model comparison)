@@ -1,0 +1,23 @@
+# Model comparison:
+model_timeseries_or_notimeseres = "
+model {
+
+  #Prior
+  tau ~ dgamma(0.1, 0.1)
+  sigma <- 1/sqrt(tau)
+  mu ~ dnorm(0,1)
+  
+  m_prob[1] <- 0.5
+  m_prob[2] <- 0.5
+  m ~ dcat(m_prob[])
+
+  y[1] ~ dnorm(mu, tau)
+  
+  #Likelihood
+  for(i in 2:n){
+  psi[i] <- equals(m,1)*mu + equals(m,2)*y[i-1]
+  y[i] ~ dnorm(psi[i], tau)
+  }
+}
+
+"
